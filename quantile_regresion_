@@ -1,0 +1,75 @@
+library(quantreg)  # 载入quantreg包
+df=suicide_model
+fit1 = rq(FHP ~ FST, tau = 0.25, data = df) 
+r1 = resid(fit1)   # 得到残差序列，并赋值为变量r1
+c1 = coef(fit1)    # 得到模型的系数，并赋值给变量c1
+summary(fit1)      # 显示分位数回归的模型和系数
+summary(fit1, se = "boot") # 通过设置参数se，可以得到系数的假设检验
+
+
+#分位数图_debug
+fit1 = rq(HP ~ BO, tau = 0.5, data = df) 
+fit2 = rq(HP ~ BO, tau = 0.75, data = df) 
+anova(fit1,fit2) 
+plot(df$HP, df$BO, pch=20, col = "#2E8B57",
+     main = "无聊与绝望的分位数回归",xlab="绝望",ylab="无聊")
+lines(fitted(fit1), df$BO,lwd=2, col = "#EEEE00")
+lines(fitted(fit2), df$BO,lwd=2, col = "#EE6363")
+legend("topright", c("tau=.5","tau=.75"), lty=c(1,1),
+       col=c("#EEEE00","#EE6363"))
+
+#quantile_regression_plots
+df=suicide_model
+fit = rq(HP ~ distraction,  tau = c(0.05,0.25,0.5,0.75,0.95), data = df)
+plot( summary(fit))
+fit = rq(FHP ~ F_distraction,  tau = c(0.05,0.25,0.5,0.75,0.95), data = df)
+plot( summary(fit))
+
+df=mix
+fit = rq(HP ~ distraction,  tau = c(0.05,0.25,0.5,0.75,0.95), data = df)
+plot( summary(fit))
+fit = rq(HP ~ BO,  tau = c(0.05,0.25,0.5,0.75,0.95), data = df)
+plot( summary(fit))
+df=suicide_model
+fit1 <- rq(HP ~ BO + DP + ST + disengagement + distraction, data = df,tau=.25)
+fit2 <- rq(HP ~ BO + DP + ST + disengagement + distraction, data = df,tau=.50)
+fit3 <- rq(HP ~ BO + DP + ST + disengagement + distraction, data = df,tau=.75)
+# 替代方式 fit <- rq(y.net ~ lgdp2 + fse2 + gedy2 + Iy2 + gcony2, method = "fn", tau = 1:4/5, data = barro)
+anova(fit1,fit2,fit3)             # 不同分位点模型比较-方差分析
+anova(fit1,fit2,fit3,joint=FALSE)
+#不同分位点拟合曲线的比较
+plot(df$HP,pch=20, col = "#2E8B57",
+     main = "不同分位点拟合曲线的比较")
+lines(fitted(fit1),lwd=2, col = "#FF00FF")
+lines(fitted(fit2),lwd=2, col = "#EEEE00")
+lines(fitted(fit3),lwd=2, col = "#EE6363")
+legend("topright", c("tau=.25","tau=.50","tau=.75"), lty=c(1,1),
+       col=c( "#FF00FF","#EEEE00","#EE6363"))
+
+
+#散点图
+attach(df)
+
+plot(BO, HP, cex = 0.25, xlab ="BOREDOM", ylab = "HOPELESS",axes=T)
+
+abline(rq(HP ~BO , tau = 0.05),lty=1,lwd=1,col='brown')
+
+points(BO,HP, cex = 0.15, lwd=2,col = "red")
+abline(rq(HP ~BO , tau = 0.25),lty=1,lwd=1,col='antiquewhite2')
+
+points(BO,HP, cex = 0.15, lwd=2,col = "red")
+abline(rq(HP ~BO , tau = 0.5),lty=1,lwd=1,col='antiquewhite3')
+
+points(BO,HP, cex = 0.15, lwd=2,col = "red")
+abline(rq(HP ~BO , tau = 0.75),lty=1,lwd=1,col='antiquewhite4')
+
+points(BO,HP, cex = 0.15, lwd=2,col = "red")
+abline(rq(HP ~BO , tau = OLS),lty=1,lwd=1,col='black')
+
+points(BO,HP, cex = 0.15, lwd=2,col = "red")
+
+col2=c('brown','antiquewhite2','antiquewhite3','antiquewhite4','black')
+
+txt.legend=c('0.05predict','0.25predict','0.5predict','0.75predict','OLS')
+
+legend('bottomright',pch=c(1,1,1,1),lty=c(1,1,1,1),legend=txt.legend,col=c(col2),ncol=2,bg="white",bty='n')
